@@ -431,8 +431,8 @@
             let allStreams = [];
             let cursor = null;
             
-            // Fetch up to 500 streams (5 pages of 100)
-            for (let i = 0; i < 5; i++) {
+            // Fetch up to 2000 streams (20 pages of 100)
+            for (let i = 0; i < 20; i++) {
                 const url = new URL('https://api.twitch.tv/helix/streams');
                 url.searchParams.set('game_id', CONFIG.GTA_V_GAME_ID);
                 url.searchParams.set('first', '100');
@@ -457,6 +457,9 @@
                 // Check if there are more pages
                 cursor = data.pagination?.cursor;
                 if (!cursor) break;
+                
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
 
             return allStreams;
@@ -548,7 +551,7 @@
                 <div class="loading-state">
                     <div class="loading-spinner"></div>
                     <h3 class="state-title">Loading Streams</h3>
-                    <p class="state-message">Searching GTA V streams for Chase RP...</p>
+                    <p class="state-message">Scanning up to 2,000 GTA V streams for Chase RP...</p>
                 </div>
             `;
             document.querySelector('.refresh-btn').classList.add('loading');
