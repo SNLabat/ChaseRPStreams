@@ -398,7 +398,18 @@
             GTA_V_GAME_ID: '32982',
             
             // Search terms for Chase RP streams (case-insensitive)
-            SEARCH_TERMS: ['chaserp', 'chase rp', 'chase roleplay', 'chaseroleplay']
+            SEARCH_TERMS: [
+                'chaserp', 
+                'chase rp', 
+                'chase roleplay', 
+                'chaseroleplay',
+                'chase-rp',
+                'chase-roleplay',
+                '#chaserp',
+                '!chaserp',
+                'chase_rp',
+                'chase_roleplay'
+            ]
         };
 
         // State
@@ -426,13 +437,14 @@
             return data.access_token;
         }
 
-        // Get all GTA V streams (paginated)
+        // Get all GTA V streams (paginated, deduplicated)
         async function getAllGTAStreams() {
             let allStreams = [];
+            let seenIds = new Set();
             let cursor = null;
             
-            // Fetch up to 2000 streams (20 pages of 100)
-            for (let i = 0; i < 20; i++) {
+            // Fetch up to 10,000 streams (100 pages of 100)
+            for (let i = 0; i < 100; i++) {
                 const url = new URL('https://api.twitch.tv/helix/streams');
                 url.searchParams.set('game_id', CONFIG.GTA_V_GAME_ID);
                 url.searchParams.set('first', '100');
@@ -452,14 +464,23 @@
                 }
 
                 const data = await response.json();
-                allStreams = allStreams.concat(data.data || []);
+                
+                // Deduplicate by stream ID
+                for (const stream of (data.data || [])) {
+                    if (!seenIds.has(stream.id)) {
+                        seenIds.add(stream.id);
+                        allStreams.push(stream);
+                    }
+                }
+                
+                console.log(`Fetched page ${i + 1}, total streams: ${allStreams.length}`);
                 
                 // Check if there are more pages
                 cursor = data.pagination?.cursor;
                 if (!cursor) break;
                 
                 // Small delay to avoid rate limiting
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 50));
             }
 
             return allStreams;
@@ -497,11 +518,23 @@
             return profiles;
         }
 
-        // Filter streams by title containing search terms
+        // Filter streams by title containing search terms (with deduplication by user)
         function filterStreamsByTitle(streams) {
+            const seenUsers = new Set();
             return streams.filter(stream => {
+                // Skip if we've already seen this user
+                if (seenUsers.has(stream.user_id)) {
+                    return false;
+                }
+                
                 const title = stream.title.toLowerCase();
-                return CONFIG.SEARCH_TERMS.some(term => title.includes(term));
+                const matches = CONFIG.SEARCH_TERMS.some(term => title.includes(term));
+                
+                if (matches) {
+                    seenUsers.add(stream.user_id);
+                }
+                
+                return matches;
             });
         }
 
@@ -551,7 +584,7 @@
                 <div class="loading-state">
                     <div class="loading-spinner"></div>
                     <h3 class="state-title">Loading Streams</h3>
-                    <p class="state-message">Scanning up to 2,000 GTA V streams for Chase RP...</p>
+                    <p class="state-message">Scanning all GTA V streams for Chase RP...</p>
                 </div>
             `;
             document.querySelector('.refresh-btn').classList.add('loading');
