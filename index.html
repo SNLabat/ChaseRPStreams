@@ -443,8 +443,8 @@
             let seenIds = new Set();
             let cursor = null;
             
-            // Fetch up to 10,000 streams (100 pages of 100)
-            for (let i = 0; i < 100; i++) {
+            // Fetch up to 3,000 streams (30 pages of 100)
+            for (let i = 0; i < 30; i++) {
                 const url = new URL('https://api.twitch.tv/helix/streams');
                 url.searchParams.set('game_id', CONFIG.GTA_V_GAME_ID);
                 url.searchParams.set('first', '100');
