@@ -1085,18 +1085,15 @@
             return clips;
         }
 
-        // Fetch GTA V clips and filter by title OR known streamer IDs
-        async function fetchGTAClipsWithKeywords(dateRange, knownStreamerIds = null) {
+        // Fetch GTA V clips - gets all clips first, then filters by VOD title
+        async function fetchGTAClipsWithKeywords(dateRange) {
             const clips = [];
             let cursor = null;
 
-            // Create a Set for fast lookup if we have known IDs
-            const knownIdSet = knownStreamerIds ? new Set(knownStreamerIds) : null;
+            updateProgress('Searching GTA V clips...');
 
-            updateProgress('Searching GTA V clips for Chase RP streamers...');
-
-            // Fetch more pages since we're using the database filter
-            const maxPages = knownIdSet ? 30 : 10;
+            // Fetch clips (more pages for better coverage)
+            const maxPages = 30;
 
             for (let i = 0; i < maxPages; i++) {
                 const url = new URL('https://api.twitch.tv/helix/clips');
@@ -1119,18 +1116,17 @@
 
                 const data = await response.json();
 
+                // First pass: include clips with ChaseRP in title
                 for (const clip of (data.data || [])) {
-                    const title = clip.title.toLowerCase();
-                    const hasKeyword = CONFIG.SEARCH_TERMS.some(term => title.includes(term));
-                    const isKnownStreamer = knownIdSet ? knownIdSet.has(clip.broadcaster_id) : false;
-
-                    // Include clip if it has keyword OR is from a known ChaseRP streamer
-                    if (hasKeyword || isKnownStreamer) {
+                    if (containsChaseRPKeyword(clip.title)) {
+                        clips.push(clip);
+                    } else {
+                        // Store for potential VOD title check
                         clips.push(clip);
                     }
                 }
 
-                updateProgress(`Searching GTA V clips... (found ${clips.length} so far)`);
+                updateProgress(`Searching GTA V clips... (${clips.length} found, page ${i + 1}/${maxPages})`);
 
                 cursor = data.pagination?.cursor;
                 if (!cursor || data.data.length < 100) break;
@@ -1169,6 +1165,51 @@
             }
 
             return profiles;
+        }
+
+        // Fetch VOD details to check stream titles
+        async function getVODTitles(videoIds) {
+            const vodTitles = {};
+            const uniqueIds = [...new Set(videoIds)].filter(Boolean);
+
+            if (uniqueIds.length === 0) return vodTitles;
+
+            for (let i = 0; i < uniqueIds.length; i += 100) {
+                const batch = uniqueIds.slice(i, i + 100);
+                const params = batch.map(id => `id=${id}`).join('&');
+
+                try {
+                    const response = await fetch(
+                        `https://api.twitch.tv/helix/videos?${params}`,
+                        {
+                            headers: {
+                                'Client-ID': CONFIG.CLIENT_ID,
+                                'Authorization': `Bearer ${accessToken}`
+                            }
+                        }
+                    );
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        (data.data || []).forEach(video => {
+                            vodTitles[video.id] = video.title;
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error fetching VOD titles:', e);
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            return vodTitles;
+        }
+
+        // Check if text contains any ChaseRP keyword
+        function containsChaseRPKeyword(text) {
+            if (!text) return false;
+            const lowerText = text.toLowerCase();
+            return CONFIG.SEARCH_TERMS.some(term => lowerText.includes(term));
         }
 
         // ============================================
@@ -1240,29 +1281,45 @@
                 let allClips = [];
                 const seenClipIds = new Set();
 
-                // Strategy 1: Load known ChaseRP streamer IDs from API (9,000+ streamers)
-                // This is used as a FILTER, not to fetch from each one
-                const knownStreamerIds = await fetchKnownStreamerIds();
-                console.log(`Loaded ${knownStreamerIds.length} known ChaseRP streamer IDs`);
-
-                // Strategy 2: Discover currently live Chase RP streamers
+                // Strategy 1: Discover currently live Chase RP streamers
                 updateProgress('Discovering live Chase RP streamers...');
                 const liveStreamers = await discoverChaseRPStreamers();
                 console.log(`Found ${liveStreamers.length} currently live Chase RP streamers`);
 
-                // Strategy 3: Search GTA V clips and filter by:
-                // - Clips with ChaseRP keywords in title (live or offline streamers)
-                // - Clips from known ChaseRP streamers (even without keyword in title)
+                // Strategy 2: Search GTA V clips (gets all recent clips)
                 updateProgress('Searching GTA V clips...');
-                const filteredClips = await fetchGTAClipsWithKeywords(dateRange, knownStreamerIds);
-                console.log(`Found ${filteredClips.length} clips from ChaseRP streamers`);
+                const allGTAClips = await fetchGTAClipsWithKeywords(dateRange);
+                console.log(`Found ${allGTAClips.length} total GTA V clips`);
 
-                for (const clip of filteredClips) {
-                    if (!seenClipIds.has(clip.id)) {
-                        seenClipIds.add(clip.id);
-                        allClips.push(clip);
+                // Strategy 3: Filter clips by VOD title (this is the key!)
+                // Extract video IDs from clips that have them
+                const videoIds = allGTAClips
+                    .map(clip => clip.video_id)
+                    .filter(Boolean);
+
+                console.log(`Fetching ${videoIds.length} VOD titles to verify ChaseRP streams...`);
+                updateProgress(`Checking VOD titles for ChaseRP... (${videoIds.length} VODs)`);
+
+                const vodTitles = await getVODTitles(videoIds);
+                console.log(`Retrieved ${Object.keys(vodTitles).length} VOD titles`);
+
+                // Filter clips: include if clip title OR VOD title has ChaseRP keywords
+                updateProgress('Filtering clips by ChaseRP keywords...');
+                for (const clip of allGTAClips) {
+                    const clipHasKeyword = containsChaseRPKeyword(clip.title);
+                    const vodTitle = clip.video_id ? vodTitles[clip.video_id] : null;
+                    const vodHasKeyword = containsChaseRPKeyword(vodTitle);
+
+                    // Include if EITHER clip title or VOD title has ChaseRP keyword
+                    if (clipHasKeyword || vodHasKeyword) {
+                        if (!seenClipIds.has(clip.id)) {
+                            seenClipIds.add(clip.id);
+                            allClips.push(clip);
+                        }
                     }
                 }
+
+                console.log(`Filtered to ${allClips.length} ChaseRP clips`);
 
                 // Strategy 4: Fetch additional clips from currently live streamers (bonus content)
                 if (liveStreamers.length > 0) {
