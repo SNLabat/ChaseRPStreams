@@ -4,7 +4,6 @@
   "description": "Chase Roleplay Twitch Streams and Clips Aggregator",
   "scripts": {
     "dev": "vercel dev",
-    "build": "vercel build",
     "deploy": "vercel --prod"
   },
   "keywords": [
