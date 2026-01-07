@@ -1085,14 +1085,20 @@
             return clips;
         }
 
-        // Fetch GTA V clips and filter by title
-        async function fetchGTAClipsWithKeywords(dateRange) {
+        // Fetch GTA V clips and filter by title OR known streamer IDs
+        async function fetchGTAClipsWithKeywords(dateRange, knownStreamerIds = null) {
             const clips = [];
             let cursor = null;
 
-            updateProgress('Searching GTA V clips for Chase RP keywords...');
+            // Create a Set for fast lookup if we have known IDs
+            const knownIdSet = knownStreamerIds ? new Set(knownStreamerIds) : null;
 
-            for (let i = 0; i < 10; i++) {
+            updateProgress('Searching GTA V clips for Chase RP streamers...');
+
+            // Fetch more pages since we're using the database filter
+            const maxPages = knownIdSet ? 30 : 10;
+
+            for (let i = 0; i < maxPages; i++) {
                 const url = new URL('https://api.twitch.tv/helix/clips');
                 url.searchParams.set('game_id', CONFIG.GTA_V_GAME_ID);
                 url.searchParams.set('started_at', dateRange.start);
@@ -1115,10 +1121,16 @@
 
                 for (const clip of (data.data || [])) {
                     const title = clip.title.toLowerCase();
-                    if (CONFIG.SEARCH_TERMS.some(term => title.includes(term))) {
+                    const hasKeyword = CONFIG.SEARCH_TERMS.some(term => title.includes(term));
+                    const isKnownStreamer = knownIdSet ? knownIdSet.has(clip.broadcaster_id) : false;
+
+                    // Include clip if it has keyword OR is from a known ChaseRP streamer
+                    if (hasKeyword || isKnownStreamer) {
                         clips.push(clip);
                     }
                 }
+
+                updateProgress(`Searching GTA V clips... (found ${clips.length} so far)`);
 
                 cursor = data.pagination?.cursor;
                 if (!cursor || data.data.length < 100) break;
@@ -1228,25 +1240,31 @@
                 let allClips = [];
                 const seenClipIds = new Set();
 
-                // Strategy 1: Discover currently live Chase RP streamers (FAST - only live streams)
+                // Strategy 1: Load known ChaseRP streamer IDs from API (9,000+ streamers)
+                // This is used as a FILTER, not to fetch from each one
+                const knownStreamerIds = await fetchKnownStreamerIds();
+                console.log(`Loaded ${knownStreamerIds.length} known ChaseRP streamer IDs`);
+
+                // Strategy 2: Discover currently live Chase RP streamers
                 updateProgress('Discovering live Chase RP streamers...');
                 const liveStreamers = await discoverChaseRPStreamers();
                 console.log(`Found ${liveStreamers.length} currently live Chase RP streamers`);
 
-                // Strategy 2: Search GTA V clips by keyword (FAST - catches both live and offline)
-                // This is the PRIMARY method for finding clips from offline streamers
-                updateProgress('Searching GTA V clips for Chase RP keywords...');
-                const keywordClips = await fetchGTAClipsWithKeywords(dateRange);
-                console.log(`Found ${keywordClips.length} clips via keyword search`);
+                // Strategy 3: Search GTA V clips and filter by:
+                // - Clips with ChaseRP keywords in title (live or offline streamers)
+                // - Clips from known ChaseRP streamers (even without keyword in title)
+                updateProgress('Searching GTA V clips...');
+                const filteredClips = await fetchGTAClipsWithKeywords(dateRange, knownStreamerIds);
+                console.log(`Found ${filteredClips.length} clips from ChaseRP streamers`);
 
-                for (const clip of keywordClips) {
+                for (const clip of filteredClips) {
                     if (!seenClipIds.has(clip.id)) {
                         seenClipIds.add(clip.id);
                         allClips.push(clip);
                     }
                 }
 
-                // Strategy 3: Fetch clips from currently live streamers (bonus content)
+                // Strategy 4: Fetch additional clips from currently live streamers (bonus content)
                 if (liveStreamers.length > 0) {
                     updateProgress(`Fetching clips from ${liveStreamers.length} live streamers...`);
 
