@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chase Roleplay | Live Streams</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #121216;
+            --bg-card: #18181b;
+            --bg-card-hover: #1f1f23;
+            --accent: #ff3c8e;
+            --accent-dim: rgba(255, 60, 142, 0.15);
+            --accent-glow: rgba(255, 60, 142, 0.4);
+            --text-primary: #efeff1;
+            --text-secondary: #adadb8;
+            --text-muted: #636369;
+            --border: #2a2a2e;
+            --live-red: #eb0400;
+            --live-glow: rgba(235, 4, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(255, 60, 142, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(255, 60, 142, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 48px 0 0;
+            margin-bottom: 0;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+        }
+
+        .brand a {
+            text-decoration: none;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-dim);
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.98);
+        }
+
+        .refresh-btn svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .refresh-btn:hover svg {
+            transform: rotate(180deg);
+        }
+
+        .refresh-btn.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 32px 0 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-dim);
+        }
+
+        .nav-tab svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            padding: 16px 0;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .streams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            padding-bottom: 80px;
+        }
+
+        .stream-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .stream-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px var(--accent-dim);
+        }
+
+        .thumbnail-wrapper {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: var(--bg-secondary);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .stream-card:hover .thumbnail {
+            transform: scale(1.05);
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: var(--live-red);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 0 20px var(--live-glow);
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .viewer-count {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .viewer-count svg {
+            width: 14px;
+            height: 14px;
+            color: var(--live-red);
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .streamer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            object-fit: cover;
+        }
+
+        .streamer-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .stream-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+
+        .loading-state,
+        .error-state,
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        .state-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .state-message {
+            color: var(--text-muted);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        footer {
+            padding: 32px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="brand">
+                    <a href="index.html">
+                        <h1>Chase Roleplay</h1>
+                    </a>
+                </div>
+                <button class="refresh-btn" onclick="fetchStreams()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 11-2.636-6.364"/>
+                        <path d="M21 3v6h-6"/>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <a href="index.html" class="nav-tab active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                Live Streams
+            </a>
+            <a href="clips.html" class="nav-tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                Top Clips
+            </a>
+        </nav>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-value" id="stream-count">0</span>
+                <span class="stat-label">Live Streams</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="viewer-count">0</span>
+                <span class="stat-label">Total Viewers</span>
+            </div>
+        </div>
+
+        <div class="streams-grid" id="streams-grid"></div>
+
+        <footer>
+            Powered by Twitch API - Not affiliated with Rockstar Games
+        </footer>
+    </div>
+
+    <script>
+        var CONFIG = {
+            CLIENT_ID: 'daryrfspmnbist23whhjlf7jkabhnp',
+            CLIENT_SECRET: 'cc8mkpmvzwwnvghg5nr9sm83aetil2',
+            GTA_V_GAME_ID: '32982',
+            SEARCH_TERMS: [
+                'chaserp',
+                'chase rp',
+                'chase roleplay',
+                'chaseroleplay',
+                'chase-rp',
+                'chase-roleplay',
+                '#chaserp',
+                '!chaserp',
+                'chase_rp',
+                'chase_roleplay'
+            ]
+        };
+
+        var accessToken = null;
+
+        function getAccessToken() {
+            return fetch('https://id.twitch.tv/oauth2/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'client_id=' + CONFIG.CLIENT_ID + '&client_secret=' + CONFIG.CLIENT_SECRET + '&grant_type=client_credentials'
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Failed to get access token. Check your credentials.');
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                return data.access_token;
+            });
+        }
+
+        function getAllGTAStreams() {
+            var allStreams = [];
+            var seenIds = {};
+
+            function fetchPage(cursor) {
+                var url = 'https://api.twitch.tv/helix/streams?game_id=' + CONFIG.GTA_V_GAME_ID + '&first=100';
+                if (cursor) {
+                    url += '&after=' + cursor;
+                }
+
+                return fetch(url, {
+                    headers: {
+                        'Client-ID': CONFIG.CLIENT_ID,
+                        'Authorization': 'Bearer ' + accessToken
+                    }
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch streams');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    var streams = data.data || [];
+
+                    streams.forEach(function(stream) {
+                        if (!seenIds[stream.id]) {
+                            seenIds[stream.id] = true;
+                            allStreams.push(stream);
+                        }
+                    });
+
+                    console.log('Fetched page, total streams: ' + allStreams.length);
+
+                    if (data.pagination && data.pagination.cursor && allStreams.length < 3000) {
+                        return new Promise(function(resolve) {
+                            setTimeout(function() {
+                                resolve(fetchPage(data.pagination.cursor));
+                            }, 50);
+                        });
+                    }
+
+                    return allStreams;
+                });
+            }
+
+            return fetchPage(null);
+        }
+
+        function getUserProfiles(userIds) {
+            if (userIds.length === 0) return Promise.resolve({});
+
+            var profiles = {};
+            var batches = [];
+
+            for (var i = 0; i < userIds.length; i += 100) {
+                batches.push(userIds.slice(i, i + 100));
+            }
+
+            function fetchBatch(index) {
+                if (index >= batches.length) {
+                    return Promise.resolve(profiles);
+                }
+
+                var params = batches[index].map(function(id) {
+                    return 'id=' + id;
+                }).join('&');
+
+                return fetch('https://api.twitch.tv/helix/users?' + params, {
+                    headers: {
+                        'Client-ID': CONFIG.CLIENT_ID,
+                        'Authorization': 'Bearer ' + accessToken
+                    }
+                })
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    return { data: [] };
+                })
+                .then(function(data) {
+                    (data.data || []).forEach(function(user) {
+                        profiles[user.id] = user.profile_image_url;
+                    });
+                    return fetchBatch(index + 1);
+                });
+            }
+
+            return fetchBatch(0);
+        }
+
+        function filterStreamsByTitle(streams) {
+            var seenUsers = {};
+            return streams.filter(function(stream) {
+                if (seenUsers[stream.user_id]) {
+                    return false;
+                }
+
+                var title = stream.title.toLowerCase();
+                var matches = CONFIG.SEARCH_TERMS.some(function(term) {
+                    return title.indexOf(term) !== -1;
+                });
+
+                if (matches) {
+                    seenUsers[stream.user_id] = true;
+                }
+
+                return matches;
+            });
+        }
+
+        function formatViewers(count) {
+            if (count >= 1000) {
+                return (count / 1000).toFixed(1) + 'K';
+            }
+            return count.toString();
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function createStreamCard(stream, profileUrl) {
+            var thumbnailUrl = stream.thumbnail_url
+                .replace('{width}', '440')
+                .replace('{height}', '248');
+
+            var defaultAvatar = 'https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png';
+            var avatar = profileUrl || defaultAvatar;
+
+            return '<a href="https://twitch.tv/' + stream.user_login + '" target="_blank" class="stream-card">' +
+                '<div class="thumbnail-wrapper">' +
+                    '<img class="thumbnail" src="' + thumbnailUrl + '" alt="' + escapeHtml(stream.user_name) + ' stream" loading="lazy">' +
+                    '<div class="live-badge">' +
+                        '<span class="live-dot"></span>' +
+                        'LIVE' +
+                    '</div>' +
+                    '<div class="viewer-count">' +
+                        '<svg viewBox="0 0 24 24" fill="currentColor">' +
+                            '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>' +
+                        '</svg>' +
+                        formatViewers(stream.viewer_count) +
+                    '</div>' +
+                '</div>' +
+                '<div class="card-content">' +
+                    '<div class="streamer-info">' +
+                        '<img class="avatar" src="' + avatar + '" alt="' + escapeHtml(stream.user_name) + '">' +
+                        '<span class="streamer-name">' + escapeHtml(stream.user_name) + '</span>' +
+                    '</div>' +
+                    '<p class="stream-title">' + escapeHtml(stream.title) + '</p>' +
+                '</div>' +
+            '</a>';
+        }
+
+        function showLoading() {
+            document.getElementById('streams-grid').innerHTML =
+                '<div class="loading-state">' +
+                    '<div class="loading-spinner"></div>' +
+                    '<h3 class="state-title">Loading Streams</h3>' +
+                    '<p class="state-message">Scanning all GTA V streams for Chase RP...</p>' +
+                '</div>';
+            document.querySelector('.refresh-btn').classList.add('loading');
+        }
+
+        function showError(message) {
+            document.getElementById('streams-grid').innerHTML =
+                '<div class="error-state">' +
+                    '<h3 class="state-title">Something went wrong</h3>' +
+                    '<p class="state-message">' + message + '</p>' +
+                '</div>';
+            document.querySelector('.refresh-btn').classList.remove('loading');
+        }
+
+        function showEmpty() {
+            document.getElementById('streams-grid').innerHTML =
+                '<div class="empty-state">' +
+                    '<h3 class="state-title">No Streams Live</h3>' +
+                    '<p class="state-message">No Chase RP streams are currently live. Check back later!</p>' +
+                '</div>';
+        }
+
+        function updateStats(streamCount, viewerCount) {
+            document.getElementById('stream-count').textContent = streamCount;
+            document.getElementById('viewer-count').textContent = formatViewers(viewerCount);
+        }
+
+        function fetchStreams() {
+            showLoading();
+
+            getAccessToken()
+                .then(function(token) {
+                    accessToken = token;
+                    return getAllGTAStreams();
+                })
+                .then(function(allStreams) {
+                    console.log('Found ' + allStreams.length + ' total GTA V streams');
+
+                    var filteredStreams = filterStreamsByTitle(allStreams);
+                    console.log('Found ' + filteredStreams.length + ' Chase RP streams');
+
+                    if (filteredStreams.length === 0) {
+                        showEmpty();
+                        updateStats(0, 0);
+                        document.querySelector('.refresh-btn').classList.remove('loading');
+                        return;
+                    }
+
+                    var userIds = filteredStreams.map(function(s) { return s.user_id; });
+
+                    return getUserProfiles(userIds).then(function(profiles) {
+                        filteredStreams.sort(function(a, b) {
+                            return b.viewer_count - a.viewer_count;
+                        });
+
+                        var totalViewers = filteredStreams.reduce(function(sum, s) {
+                            return sum + s.viewer_count;
+                        }, 0);
+                        updateStats(filteredStreams.length, totalViewers);
+
+                        var grid = document.getElementById('streams-grid');
+                        grid.innerHTML = filteredStreams.map(function(stream) {
+                            return createStreamCard(stream, profiles[stream.user_id]);
+                        }).join('');
+
+                        document.querySelector('.refresh-btn').classList.remove('loading');
+                    });
+                })
+                .catch(function(error) {
+                    console.error('Error fetching streams:', error);
+                    showError(error.message || 'Failed to load streams. Please try again.');
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchStreams);
+    </script>
+</body>
+</html>

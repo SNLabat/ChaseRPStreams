@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chase Roleplay | Top Clips</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #121216;
+            --bg-card: #18181b;
+            --bg-card-hover: #1f1f23;
+            --accent: #ff3c8e;
+            --accent-dim: rgba(255, 60, 142, 0.15);
+            --accent-glow: rgba(255, 60, 142, 0.4);
+            --text-primary: #efeff1;
+            --text-secondary: #adadb8;
+            --text-muted: #636369;
+            --border: #2a2a2e;
+            --live-red: #eb0400;
+            --live-glow: rgba(235, 4, 0, 0.5);
+            --purple: #9147ff;
+            --purple-dim: rgba(145, 71, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Subtle background texture */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(255, 60, 142, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(255, 60, 142, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 48px 0 0;
+            margin-bottom: 0;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-dim);
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.98);
+        }
+
+        .refresh-btn svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .refresh-btn:hover svg {
+            transform: rotate(180deg);
+        }
+
+        .refresh-btn.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 32px 0 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-dim);
+        }
+
+        .nav-tab svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-label {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .time-filters {
+            display: flex;
+            gap: 8px;
+        }
+
+        .time-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .time-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .time-btn.active {
+            color: var(--text-primary);
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .sort-select {
+            padding: 10px 16px;
+            padding-right: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23adadb8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            transition: all 0.2s ease;
+        }
+
+        .sort-select:hover {
+            border-color: var(--accent);
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            padding: 16px 0;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .cache-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .cache-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Clips grid */
+        .clips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            padding-bottom: 80px;
+        }
+
+        /* Clip card */
+        .clip-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .clip-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px var(--accent-dim);
+        }
+
+        .clip-thumbnail-wrapper {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: var(--bg-secondary);
+        }
+
+        .clip-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .clip-card:hover .clip-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .clip-duration {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .clip-views {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .clip-views svg {
+            width: 14px;
+            height: 14px;
+            color: var(--purple);
+        }
+
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .clip-card:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .play-button {
+            width: 64px;
+            height: 64px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            transition: transform 0.2s ease;
+        }
+
+        .clip-card:hover .play-button {
+            transform: scale(1.1);
+        }
+
+        .play-button svg {
+            width: 28px;
+            height: 28px;
+            margin-left: 4px;
+            color: white;
+        }
+
+        .clip-content {
+            padding: 16px;
+        }
+
+        .clip-title {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .clip-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .clip-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .clip-streamer {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .clip-date {
+            color: var(--text-muted);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding-right: 16px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .modal-video {
+            aspect-ratio: 16 / 9;
+            background: black;
+        }
+
+        .modal-video iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .modal-info {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .modal-streamer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .modal-streamer-name {
+            font-weight: 600;
+        }
+
+        .modal-clipped-by {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .modal-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-stat svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .watch-on-twitch {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--purple);
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .watch-on-twitch:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+
+        .watch-on-twitch svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* States */
+        .loading-state,
+        .error-state,
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        .state-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .state-message {
+            color: var(--text-muted);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Progress indicator */
+        .progress-text {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 16px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 32px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .time-filters {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .sort-select {
+                width: 100%;
+            }
+
+            .modal-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="brand">
+                    <a href="index.html" style="text-decoration: none;">
+                        <h1>Chase Roleplay</h1>
+                    </a>
+                </div>
+                <button class="refresh-btn" onclick="fetchClips(true)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 11-2.636-6.364"/>
+                        <path d="M21 3v6h-6"/>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <a href="index.html" class="nav-tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                Live Streams
+            </a>
+            <a href="clips.html" class="nav-tab active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                Top Clips
+            </a>
+        </nav>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <span class="filter-label">Time Range</span>
+                <div class="time-filters">
+                    <button class="time-btn" data-range="24h">24 Hours</button>
+                    <button class="time-btn active" data-range="7d">7 Days</button>
+                    <button class="time-btn" data-range="30d">30 Days</button>
+                </div>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Sort By</span>
+                <select class="sort-select" id="sort-select">
+                    <option value="views">Most Viewed</option>
+                    <option value="recent">Most Recent</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-value" id="clip-count">0</span>
+                <span class="stat-label">Clips</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="total-views">0</span>
+                <span class="stat-label">Total Views</span>
+            </div>
+            <div class="cache-info">
+                <span class="cache-status" id="cache-status" style="display: none;"></span>
+            </div>
+        </div>
+
+        <div class="clips-grid" id="clips-grid">
+            <!-- Clips will be loaded here -->
+        </div>
+
+        <footer>
+            Powered by Twitch API • Not affiliated with Rockstar Games
+        </footer>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Clip Title</h2>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-video" id="modal-video">
+                <!-- Iframe will be injected here -->
+            </div>
+            <div class="modal-info">
+                <div class="modal-streamer">
+                    <img class="modal-avatar" id="modal-avatar" src="" alt="">
+                    <div>
+                        <div class="modal-streamer-name" id="modal-streamer-name">Streamer Name</div>
+                        <div class="modal-clipped-by" id="modal-clipped-by">Clipped by User</div>
+                    </div>
+                </div>
+                <div class="modal-stats">
+                    <div class="modal-stat">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                        <span id="modal-views">0 views</span>
+                    </div>
+                    <a class="watch-on-twitch" id="modal-twitch-link" href="#" target="_blank">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+                        </svg>
+                        Watch on Twitch
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            CLIENT_ID: 'daryrfspmnbist23whhjlf7jkabhnp',
+            CLIENT_SECRET: 'cc8mkpmvzwwnvghg5nr9sm83aetil2',
+
+            // GTA V game ID on Twitch
+            GTA_V_GAME_ID: '32982',
+
+            // Search terms for Chase RP (case-insensitive)
+            SEARCH_TERMS: [
+                'chaserp',
+                'chase rp',
+                'chase roleplay',
+                'chaseroleplay',
+                'chase-rp',
+                'chase-roleplay',
+                '#chaserp',
+                '!chaserp',
+                'chase_rp',
+                'chase_roleplay'
+            ],
+
+            // Parent domain for Twitch embed
+            PARENT_DOMAIN: window.location.hostname || 'localhost',
+
+            // Cache settings
+            CACHE_KEY_CLIPS: 'chaserp_clips_cache',
+            CACHE_KEY_STREAMERS: 'chaserp_streamers_cache',
+            CACHE_TTL_CLIPS: 15 * 60 * 1000,      // 15 minutes for clips
+            CACHE_TTL_STREAMERS: 60 * 60 * 1000,  // 1 hour for streamer list
+
+            // Known Chase RP streamer IDs (seed list - add more as needed)
+            // These will be checked even when not live
+            KNOWN_STREAMER_IDS: [
+                // Add known Chase RP streamer Twitch IDs here
+                // Example: '12345678', '87654321'
+            ]
+        };
+
+        // State
+        let accessToken = null;
+        let currentClips = [];
+        let currentTimeRange = '7d';
+        let currentSort = 'views';
+        let userProfiles = {};
+
+        // ============================================
+        // CACHE FUNCTIONS
+        // ============================================
+
+        function getCacheKey(type, timeRange) {
+            return `${type}_${timeRange}`;
+        }
+
+        function getCache(key) {
+            try {
+                const cached = localStorage.getItem(key);
+                if (!cached) return null;
+
+                const data = JSON.parse(cached);
+                return data;
+            } catch (e) {
+                console.error('Cache read error:', e);
+                return null;
+            }
+        }
+
+        function setCache(key, data, ttl) {
+            try {
+                const cacheData = {
+                    data: data,
+                    timestamp: Date.now(),
+                    ttl: ttl
+                };
+                localStorage.setItem(key, JSON.stringify(cacheData));
+            } catch (e) {
+                console.error('Cache write error:', e);
+                // If storage is full, clear old caches
+                clearOldCaches();
+            }
+        }
+
+        function isCacheValid(cached) {
+            if (!cached || !cached.timestamp || !cached.ttl) return false;
+            return (Date.now() - cached.timestamp) < cached.ttl;
+        }
+
+        function isCacheStale(cached) {
+            if (!cached || !cached.timestamp || !cached.ttl) return true;
+            // Consider stale if older than half the TTL
+            return (Date.now() - cached.timestamp) > (cached.ttl / 2);
+        }
+
+        function clearOldCaches() {
+            const keys = Object.keys(localStorage).filter(k => k.startsWith('chaserp_'));
+            keys.forEach(k => localStorage.removeItem(k));
+        }
+
+        function formatCacheAge(timestamp) {
+            if (!timestamp) return '';
+            const age = Date.now() - timestamp;
+            const minutes = Math.floor(age / 60000);
+            if (minutes < 1) return 'just now';
+            if (minutes === 1) return '1 minute ago';
+            if (minutes < 60) return `${minutes} minutes ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours === 1) return '1 hour ago';
+            return `${hours} hours ago`;
+        }
+
+        // ============================================
+        // STREAMER CACHE
+        // ============================================
+
+        function getCachedStreamers() {
+            const cached = getCache(CONFIG.CACHE_KEY_STREAMERS);
+            if (cached && cached.data) {
+                return cached.data;
+            }
+            return [];
+        }
+
+        function cacheStreamers(streamers) {
+            // Merge with existing cached streamers
+            const existing = getCachedStreamers();
+            const merged = new Map();
+
+            [...existing, ...streamers].forEach(s => {
+                merged.set(s.id, s);
+            });
+
+            setCache(CONFIG.CACHE_KEY_STREAMERS, Array.from(merged.values()), CONFIG.CACHE_TTL_STREAMERS);
+        }
+
+        // ============================================
+        // TWITCH API FUNCTIONS
+        // ============================================
+
+        async function getAccessToken() {
+            const response = await fetch('https://id.twitch.tv/oauth2/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    client_id: CONFIG.CLIENT_ID,
+                    client_secret: CONFIG.CLIENT_SECRET,
+                    grant_type: 'client_credentials'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get access token');
+            }
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        // Get date range based on selection
+        function getDateRange(range) {
+            const now = new Date();
+            const end = now.toISOString();
+            let start;
+
+            switch (range) {
+                case '24h':
+                    start = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+                    break;
+                case '7d':
+                    start = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+                    break;
+                case '30d':
+                    start = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+                    break;
+                default:
+                    start = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+            }
+
+            return { start, end };
+        }
+
+        // Discover Chase RP streamers from live streams
+        async function discoverChaseRPStreamers() {
+            const streamers = new Map();
+            let cursor = null;
+
+            updateProgress('Discovering Chase RP streamers...');
+
+            // Fetch GTA V streams to find Chase RP streamers
+            for (let i = 0; i < 20; i++) {
+                const url = new URL('https://api.twitch.tv/helix/streams');
+                url.searchParams.set('game_id', CONFIG.GTA_V_GAME_ID);
+                url.searchParams.set('first', '100');
+                if (cursor) {
+                    url.searchParams.set('after', cursor);
+                }
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Client-ID': CONFIG.CLIENT_ID,
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!response.ok) break;
+
+                const data = await response.json();
+
+                for (const stream of (data.data || [])) {
+                    const title = stream.title.toLowerCase();
+                    if (CONFIG.SEARCH_TERMS.some(term => title.includes(term))) {
+                        streamers.set(stream.user_id, {
+                            id: stream.user_id,
+                            login: stream.user_login,
+                            name: stream.user_name
+                        });
+                    }
+                }
+
+                cursor = data.pagination?.cursor;
+                if (!cursor) break;
+
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            console.log(`Discovered ${streamers.size} Chase RP streamers`);
+            return Array.from(streamers.values());
+        }
+
+        // Fetch clips for a broadcaster
+        async function fetchBroadcasterClips(broadcasterId, dateRange) {
+            const clips = [];
+            let cursor = null;
+
+            for (let i = 0; i < 3; i++) { // Max 3 pages per broadcaster
+                const url = new URL('https://api.twitch.tv/helix/clips');
+                url.searchParams.set('broadcaster_id', broadcasterId);
+                url.searchParams.set('started_at', dateRange.start);
+                url.searchParams.set('ended_at', dateRange.end);
+                url.searchParams.set('first', '100');
+                if (cursor) {
+                    url.searchParams.set('after', cursor);
+                }
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Client-ID': CONFIG.CLIENT_ID,
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!response.ok) break;
+
+                const data = await response.json();
+
+                // Only include GTA V clips
+                for (const clip of (data.data || [])) {
+                    if (clip.game_id === CONFIG.GTA_V_GAME_ID) {
+                        clips.push(clip);
+                    }
+                }
+
+                cursor = data.pagination?.cursor;
+                if (!cursor || data.data.length < 100) break;
+            }
+
+            return clips;
+        }
+
+        // Fetch GTA V clips and filter by title
+        async function fetchGTAClipsWithKeywords(dateRange) {
+            const clips = [];
+            let cursor = null;
+
+            updateProgress('Searching GTA V clips for Chase RP keywords...');
+
+            for (let i = 0; i < 10; i++) {
+                const url = new URL('https://api.twitch.tv/helix/clips');
+                url.searchParams.set('game_id', CONFIG.GTA_V_GAME_ID);
+                url.searchParams.set('started_at', dateRange.start);
+                url.searchParams.set('ended_at', dateRange.end);
+                url.searchParams.set('first', '100');
+                if (cursor) {
+                    url.searchParams.set('after', cursor);
+                }
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Client-ID': CONFIG.CLIENT_ID,
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!response.ok) break;
+
+                const data = await response.json();
+
+                for (const clip of (data.data || [])) {
+                    const title = clip.title.toLowerCase();
+                    if (CONFIG.SEARCH_TERMS.some(term => title.includes(term))) {
+                        clips.push(clip);
+                    }
+                }
+
+                cursor = data.pagination?.cursor;
+                if (!cursor || data.data.length < 100) break;
+
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            return clips;
+        }
+
+        // Get user profiles for clips
+        async function getUserProfiles(userIds) {
+            const profiles = {};
+            const uniqueIds = [...new Set(userIds)];
+
+            for (let i = 0; i < uniqueIds.length; i += 100) {
+                const batch = uniqueIds.slice(i, i + 100);
+                const params = batch.map(id => `id=${id}`).join('&');
+
+                const response = await fetch(
+                    `https://api.twitch.tv/helix/users?${params}`,
+                    {
+                        headers: {
+                            'Client-ID': CONFIG.CLIENT_ID,
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    (data.data || []).forEach(user => {
+                        profiles[user.id] = user.profile_image_url;
+                    });
+                }
+            }
+
+            return profiles;
+        }
+
+        // ============================================
+        // MAIN FETCH FUNCTION
+        // ============================================
+
+        // Load from cache only (used on page load and time range change)
+        function loadFromCache() {
+            const cacheKey = getCacheKey(CONFIG.CACHE_KEY_CLIPS, currentTimeRange);
+            const cached = getCache(cacheKey);
+
+            if (cached && cached.data && cached.data.clips && cached.data.clips.length > 0) {
+                console.log('Loading from cache...');
+                currentClips = cached.data.clips;
+                userProfiles = cached.data.profiles || {};
+                sortAndDisplayClips();
+                updateCacheStatus(cached.timestamp);
+                return true;
+            }
+
+            return false;
+        }
+
+        // Manual refresh - always fetch fresh data
+        async function fetchClips(forceRefresh = false) {
+            // If not forcing refresh, try cache first
+            if (!forceRefresh) {
+                if (loadFromCache()) {
+                    return; // Cache hit, done
+                }
+                // No cache available, need to fetch
+            }
+
+            // Fetch fresh data
+            const cacheKey = getCacheKey(CONFIG.CACHE_KEY_CLIPS, currentTimeRange);
+            showLoading();
+            await fetchFreshClips(cacheKey);
+        }
+
+        async function fetchFreshClips(cacheKey) {
+            try {
+                accessToken = await getAccessToken();
+                const dateRange = getDateRange(currentTimeRange);
+
+                // Get streamers from cache + discover new ones
+                let streamers = getCachedStreamers();
+
+                // Add known streamer IDs
+                for (const id of CONFIG.KNOWN_STREAMER_IDS) {
+                    if (!streamers.find(s => s.id === id)) {
+                        streamers.push({ id: id, login: '', name: '' });
+                    }
+                }
+
+                // Discover additional streamers from live streams
+                const discoveredStreamers = await discoverChaseRPStreamers();
+
+                // Merge discovered streamers
+                const streamerMap = new Map(streamers.map(s => [s.id, s]));
+                discoveredStreamers.forEach(s => streamerMap.set(s.id, s));
+                streamers = Array.from(streamerMap.values());
+
+                // Cache the updated streamer list
+                cacheStreamers(streamers);
+
+                let allClips = [];
+                const seenClipIds = new Set();
+
+                // Fetch clips from streamers (batch for efficiency)
+                const totalStreamers = streamers.length;
+
+                // Process in parallel batches of 5 to speed things up
+                const batchSize = 5;
+                for (let i = 0; i < streamers.length; i += batchSize) {
+                    const batch = streamers.slice(i, i + batchSize);
+
+                    updateProgress(`Fetching clips... (${Math.min(i + batchSize, totalStreamers)}/${totalStreamers} streamers)`);
+
+                    const batchPromises = batch.map(streamer =>
+                        fetchBroadcasterClips(streamer.id, dateRange).catch(e => {
+                            console.error(`Error fetching clips for ${streamer.name}:`, e);
+                            return [];
+                        })
+                    );
+
+                    const batchResults = await Promise.all(batchPromises);
+
+                    for (const clips of batchResults) {
+                        for (const clip of clips) {
+                            if (!seenClipIds.has(clip.id)) {
+                                seenClipIds.add(clip.id);
+                                allClips.push(clip);
+                            }
+                        }
+                    }
+
+                    // Small delay between batches to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                // Also search GTA V clips by keyword (faster, catches clips from unknown streamers)
+                updateProgress('Searching for additional clips...');
+                const keywordClips = await fetchGTAClipsWithKeywords(dateRange);
+                for (const clip of keywordClips) {
+                    if (!seenClipIds.has(clip.id)) {
+                        seenClipIds.add(clip.id);
+                        allClips.push(clip);
+                    }
+                }
+
+                console.log(`Found ${allClips.length} total clips`);
+
+                if (allClips.length === 0) {
+                    showEmpty();
+                    updateStats(0, 0);
+                    document.querySelector('.refresh-btn').classList.remove('loading');
+                    return;
+                }
+
+                // Get user profiles
+                updateProgress('Loading streamer profiles...');
+                const userIds = allClips.map(c => c.broadcaster_id);
+                userProfiles = await getUserProfiles(userIds);
+
+                // Cache the results
+                setCache(cacheKey, {
+                    clips: allClips,
+                    profiles: userProfiles
+                }, CONFIG.CACHE_TTL_CLIPS);
+
+                // Store and display
+                currentClips = allClips;
+                sortAndDisplayClips();
+                updateCacheStatus(Date.now());
+
+            } catch (error) {
+                console.error('Error fetching clips:', error);
+                showError(error.message || 'Failed to load clips. Please try again.');
+            }
+
+            document.querySelector('.refresh-btn').classList.remove('loading');
+        }
+
+        // Sort and display clips
+        function sortAndDisplayClips() {
+            let sortedClips = [...currentClips];
+
+            if (currentSort === 'views') {
+                sortedClips.sort((a, b) => b.view_count - a.view_count);
+            } else {
+                sortedClips.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+
+            // Update stats
+            const totalViews = sortedClips.reduce((sum, c) => sum + c.view_count, 0);
+            updateStats(sortedClips.length, totalViews);
+
+            // Render clips
+            const grid = document.getElementById('clips-grid');
+            grid.innerHTML = sortedClips
+                .map(clip => createClipCard(clip))
+                .join('');
+        }
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        function formatDuration(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffHours < 1) return 'Just now';
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function createClipCard(clip) {
+            const thumbnailUrl = clip.thumbnail_url;
+            const profileUrl = userProfiles[clip.broadcaster_id] ||
+                'https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png';
+
+            return `
+                <div class="clip-card" onclick="openModal('${clip.id}')">
+                    <div class="clip-thumbnail-wrapper">
+                        <img class="clip-thumbnail" src="${thumbnailUrl}" alt="${clip.title}" loading="lazy">
+                        <div class="clip-duration">${formatDuration(clip.duration)}</div>
+                        <div class="clip-views">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                            ${formatNumber(clip.view_count)}
+                        </div>
+                        <div class="play-overlay">
+                            <div class="play-button">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clip-content">
+                        <h3 class="clip-title">${escapeHtml(clip.title)}</h3>
+                        <div class="clip-meta">
+                            <img class="clip-avatar" src="${profileUrl}" alt="${clip.broadcaster_name}">
+                            <span class="clip-streamer">${clip.broadcaster_name}</span>
+                            <span class="clip-date">• ${formatDate(clip.created_at)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateStats(clipCount, viewCount) {
+            document.getElementById('clip-count').textContent = clipCount;
+            document.getElementById('total-views').textContent = formatNumber(viewCount);
+        }
+
+        function updateProgress(message) {
+            const progressEl = document.querySelector('.progress-text');
+            if (progressEl) {
+                progressEl.textContent = message;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('clips-grid').innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <h3 class="state-title">Loading Clips</h3>
+                    <p class="state-message">Searching for Chase RP clips...</p>
+                    <p class="progress-text"></p>
+                </div>
+            `;
+            document.querySelector('.refresh-btn').classList.add('loading');
+        }
+
+        function showError(message) {
+            document.getElementById('clips-grid').innerHTML = `
+                <div class="error-state">
+                    <h3 class="state-title">Something went wrong</h3>
+                    <p class="state-message">${message}</p>
+                </div>
+            `;
+        }
+
+        function showEmpty() {
+            document.getElementById('clips-grid').innerHTML = `
+                <div class="empty-state">
+                    <h3 class="state-title">No Clips Found</h3>
+                    <p class="state-message">No Chase RP clips found for this time period. Try selecting a different range.</p>
+                </div>
+            `;
+        }
+
+        function updateCacheStatus(timestamp) {
+            const statusEl = document.getElementById('cache-status');
+            if (statusEl && timestamp) {
+                statusEl.textContent = `Updated ${formatCacheAge(timestamp)}`;
+                statusEl.style.display = 'block';
+            }
+        }
+
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+
+        function openModal(clipId) {
+            const clip = currentClips.find(c => c.id === clipId);
+            if (!clip) return;
+
+            const profileUrl = userProfiles[clip.broadcaster_id] ||
+                'https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png';
+
+            document.getElementById('modal-title').textContent = clip.title;
+            document.getElementById('modal-avatar').src = profileUrl;
+            document.getElementById('modal-streamer-name').textContent = clip.broadcaster_name;
+            document.getElementById('modal-clipped-by').textContent = `Clipped by ${clip.creator_name}`;
+            document.getElementById('modal-views').textContent = `${formatNumber(clip.view_count)} views`;
+            document.getElementById('modal-twitch-link').href = clip.url;
+
+            // Create iframe
+            const embedUrl = `https://clips.twitch.tv/embed?clip=${clip.id}&parent=${CONFIG.PARENT_DOMAIN}&autoplay=true`;
+            document.getElementById('modal-video').innerHTML = `
+                <iframe src="${embedUrl}" allowfullscreen></iframe>
+            `;
+
+            document.getElementById('modal-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('modal-video').innerHTML = '';
+            document.body.style.overflow = '';
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        // Time range buttons
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTimeRange = btn.dataset.range;
+                // Don't force refresh - use cache if available
+                fetchClips(false);
+            });
+        });
+
+        // Sort select
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            if (currentClips.length > 0) {
+                sortAndDisplayClips();
+            }
+        });
+
+        // Close modal on overlay click
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-overlay') {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', fetchClips);
+    </script>
+</body>
+</html>
