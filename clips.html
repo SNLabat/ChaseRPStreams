@@ -1163,6 +1163,30 @@
         // MAIN FETCH FUNCTION
         // ============================================
 
+        // Fetch streamer IDs from the Vercel API
+        async function fetchKnownStreamerIds() {
+            try {
+                updateProgress('Loading known Chase RP streamers from database...');
+                const response = await fetch('/api/streamers');
+
+                if (!response.ok) {
+                    console.warn('Failed to load known streamers from API, continuing without them');
+                    return [];
+                }
+
+                const data = await response.json();
+                if (data.success && Array.isArray(data.data)) {
+                    console.log(`Loaded ${data.data.length} known streamer IDs from API (cached: ${data.cached})`);
+                    return data.data;
+                }
+
+                return [];
+            } catch (error) {
+                console.error('Error fetching known streamer IDs:', error);
+                return [];
+            }
+        }
+
         // Load from cache only (used on page load and time range change)
         function loadFromCache() {
             const cacheKey = getCacheKey(CONFIG.CACHE_KEY_CLIPS, currentTimeRange);
@@ -1201,25 +1225,31 @@
                 accessToken = await getAccessToken();
                 const dateRange = getDateRange(currentTimeRange);
 
-                // Get streamers from cache + discover new ones
-                let streamers = getCachedStreamers();
+                // Fetch known streamer IDs from the API (this replaces the giant JSON load!)
+                const knownStreamerIds = await fetchKnownStreamerIds();
 
-                // Add known streamer IDs
+                // Start with known streamers from API
+                const streamerMap = new Map();
+                knownStreamerIds.forEach(id => {
+                    streamerMap.set(id, { id: id, login: '', name: '' });
+                });
+
+                // Add manual KNOWN_STREAMER_IDS from config (if any)
                 for (const id of CONFIG.KNOWN_STREAMER_IDS) {
-                    if (!streamers.find(s => s.id === id)) {
-                        streamers.push({ id: id, login: '', name: '' });
+                    if (!streamerMap.has(id)) {
+                        streamerMap.set(id, { id: id, login: '', name: '' });
                     }
                 }
 
-                // Discover additional streamers from live streams
+                // Discover additional streamers from currently live streams
                 const discoveredStreamers = await discoverChaseRPStreamers();
-
-                // Merge discovered streamers
-                const streamerMap = new Map(streamers.map(s => [s.id, s]));
                 discoveredStreamers.forEach(s => streamerMap.set(s.id, s));
-                streamers = Array.from(streamerMap.values());
 
-                // Cache the updated streamer list
+                // Convert to array
+                const streamers = Array.from(streamerMap.values());
+                console.log(`Total streamers to check: ${streamers.length}`);
+
+                // Cache the merged streamer list for future use
                 cacheStreamers(streamers);
 
                 let allClips = [];

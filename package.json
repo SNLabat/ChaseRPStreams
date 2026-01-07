@@ -1,0 +1,21 @@
+{
+  "name": "chase-rp-streams",
+  "version": "1.0.0",
+  "description": "Chase Roleplay Twitch Streams and Clips Aggregator",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "vercel build",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "twitch",
+    "chase-rp",
+    "gta-rp"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  }
+}
