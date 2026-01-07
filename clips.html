@@ -1225,77 +1225,59 @@
                 accessToken = await getAccessToken();
                 const dateRange = getDateRange(currentTimeRange);
 
-                // Fetch known streamer IDs from the API (this replaces the giant JSON load!)
-                const knownStreamerIds = await fetchKnownStreamerIds();
-
-                // Start with known streamers from API
-                const streamerMap = new Map();
-                knownStreamerIds.forEach(id => {
-                    streamerMap.set(id, { id: id, login: '', name: '' });
-                });
-
-                // Add manual KNOWN_STREAMER_IDS from config (if any)
-                for (const id of CONFIG.KNOWN_STREAMER_IDS) {
-                    if (!streamerMap.has(id)) {
-                        streamerMap.set(id, { id: id, login: '', name: '' });
-                    }
-                }
-
-                // Discover additional streamers from currently live streams
-                const discoveredStreamers = await discoverChaseRPStreamers();
-                discoveredStreamers.forEach(s => streamerMap.set(s.id, s));
-
-                // Convert to array
-                const streamers = Array.from(streamerMap.values());
-                console.log(`Total streamers to check: ${streamers.length}`);
-
-                // Cache the merged streamer list for future use
-                cacheStreamers(streamers);
-
                 let allClips = [];
                 const seenClipIds = new Set();
 
-                // Fetch clips from streamers (batch for efficiency)
-                const totalStreamers = streamers.length;
+                // Strategy 1: Discover currently live Chase RP streamers (FAST - only live streams)
+                updateProgress('Discovering live Chase RP streamers...');
+                const liveStreamers = await discoverChaseRPStreamers();
+                console.log(`Found ${liveStreamers.length} currently live Chase RP streamers`);
 
-                // Process in parallel batches of 5 to speed things up
-                const batchSize = 5;
-                for (let i = 0; i < streamers.length; i += batchSize) {
-                    const batch = streamers.slice(i, i + batchSize);
-
-                    updateProgress(`Fetching clips... (${Math.min(i + batchSize, totalStreamers)}/${totalStreamers} streamers)`);
-
-                    const batchPromises = batch.map(streamer =>
-                        fetchBroadcasterClips(streamer.id, dateRange).catch(e => {
-                            console.error(`Error fetching clips for ${streamer.name}:`, e);
-                            return [];
-                        })
-                    );
-
-                    const batchResults = await Promise.all(batchPromises);
-
-                    for (const clips of batchResults) {
-                        for (const clip of clips) {
-                            if (!seenClipIds.has(clip.id)) {
-                                seenClipIds.add(clip.id);
-                                allClips.push(clip);
-                            }
-                        }
-                    }
-
-                    // Small delay between batches to avoid rate limiting
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-
-                // Also search GTA V clips by keyword (faster, catches clips from unknown streamers)
-                updateProgress('Searching for additional clips...');
+                // Strategy 2: Search GTA V clips by keyword (FAST - catches both live and offline)
+                // This is the PRIMARY method for finding clips from offline streamers
+                updateProgress('Searching GTA V clips for Chase RP keywords...');
                 const keywordClips = await fetchGTAClipsWithKeywords(dateRange);
+                console.log(`Found ${keywordClips.length} clips via keyword search`);
+
                 for (const clip of keywordClips) {
                     if (!seenClipIds.has(clip.id)) {
                         seenClipIds.add(clip.id);
                         allClips.push(clip);
                     }
                 }
+
+                // Strategy 3: Fetch clips from currently live streamers (bonus content)
+                if (liveStreamers.length > 0) {
+                    updateProgress(`Fetching clips from ${liveStreamers.length} live streamers...`);
+
+                    const batchSize = 10;
+                    for (let i = 0; i < liveStreamers.length; i += batchSize) {
+                        const batch = liveStreamers.slice(i, i + batchSize);
+
+                        const batchPromises = batch.map(streamer =>
+                            fetchBroadcasterClips(streamer.id, dateRange).catch(e => {
+                                console.error(`Error fetching clips for ${streamer.name}:`, e);
+                                return [];
+                            })
+                        );
+
+                        const batchResults = await Promise.all(batchPromises);
+
+                        for (const clips of batchResults) {
+                            for (const clip of clips) {
+                                if (!seenClipIds.has(clip.id)) {
+                                    seenClipIds.add(clip.id);
+                                    allClips.push(clip);
+                                }
+                            }
+                        }
+
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    }
+                }
+
+                // Cache the live streamers for future reference
+                cacheStreamers(liveStreamers);
 
                 console.log(`Found ${allClips.length} total clips`);
 
