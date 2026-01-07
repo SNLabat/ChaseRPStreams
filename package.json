@@ -2,7 +2,6 @@
   "name": "chase-rp-streams",
   "version": "1.0.0",
   "description": "Chase Roleplay Twitch Streams and Clips Aggregator",
-  "type": "module",
   "scripts": {
     "dev": "vercel dev",
     "build": "vercel build",

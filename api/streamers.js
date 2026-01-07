@@ -1,15 +1,15 @@
 // Vercel Serverless Function to serve Chase RP streamer IDs
 // This keeps the large JSON on the server and only sends IDs to the client
 
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
 // Cache the streamer data in memory (persists across warm function calls)
 let cachedStreamerIds = null;
 let cacheTimestamp = null;
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     // Check if we have a valid cache
     const now = Date.now();
@@ -52,4 +52,4 @@ export default async function handler(req, res) {
       message: error.message
     });
   }
-}
+};
