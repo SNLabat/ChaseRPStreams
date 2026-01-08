@@ -15,8 +15,16 @@ const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
 const GTA_V_GAME_ID = '32982';
 
-// ChaseRP search terms for validation
-const CHASERP_TERMS = ['chaserp', 'chase rp', 'chase roleplay', 'chaserpg'];
+// ChaseRP search terms for validation (checked in VOD title first, then clip title)
+const CHASERP_TERMS = [
+    'chaserp', 
+    'chase rp', 
+    'chase roleplay', 
+    'chase role play',
+    'chaserpg',
+    'chase-rp',
+    '#chaserp'
+];
 
 let accessToken = null;
 let tokenExpiry = 0;
@@ -126,10 +134,23 @@ async function getVODTitles(videoIds, token) {
     return vodTitles;
 }
 
-// Check if text contains ChaseRP keywords
+// Check if content is ChaseRP related
+// Priority: Check VOD title first, fall back to clip title if VOD unavailable
 function isChaseRPContent(clipTitle, vodTitle) {
-    const combined = `${clipTitle || ''} ${vodTitle || ''}`.toLowerCase();
-    return CHASERP_TERMS.some(term => combined.includes(term));
+    const vodLower = (vodTitle || '').toLowerCase();
+    const clipLower = (clipTitle || '').toLowerCase();
+    
+    // Check VOD title first (primary source)
+    if (vodTitle && CHASERP_TERMS.some(term => vodLower.includes(term))) {
+        return true;
+    }
+    
+    // Fall back to clip title (especially when VOD unavailable)
+    if (CHASERP_TERMS.some(term => clipLower.includes(term))) {
+        return true;
+    }
+    
+    return false;
 }
 
 // Get user profiles for clips
@@ -262,12 +283,13 @@ module.exports = async function handler(req, res) {
         const startedAt = startDate.toISOString();
 
         // Get streamers to check (prioritize those not checked recently)
+        // With Pro plan (5 min timeout), we can process more streamers
         const { data: streamers, error: streamerError } = await supabase
             .from('streamers')
             .select('twitch_id')
             .eq('is_active', true)
             .order('last_clip_check', { ascending: true, nullsFirst: true })
-            .limit(100); // Process 100 streamers per run
+            .limit(500); // Process 500 streamers per run (Pro plan)
 
         if (streamerError || !streamers?.length) {
             console.log('No streamers to check or error:', streamerError);
@@ -310,8 +332,8 @@ module.exports = async function handler(req, res) {
                     .update({ last_clip_check: new Date().toISOString() })
                     .eq('twitch_id', streamer.twitch_id);
 
-                // Avoid rate limits
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // Small delay to avoid rate limits (Twitch allows 800 req/min)
+                await new Promise(resolve => setTimeout(resolve, 50));
 
             } catch (e) {
                 console.error(`Error processing streamer ${streamer.twitch_id}:`, e);
