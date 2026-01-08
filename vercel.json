@@ -1,3 +1,17 @@
 {
-  "version": 2
+  "version": 2,
+  "functions": {
+    "api/bulk-scan.js": {
+      "maxDuration": 300
+    },
+    "api/collect.js": {
+      "maxDuration": 300
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/collect?source=cron",
+      "schedule": "*/10 * * * *"
+    }
+  ]
 }
