@@ -7,7 +7,7 @@ const { createClient } = require('@supabase/supabase-js');
 // Initialize Supabase with service role key for write access
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 // Twitch API configuration
