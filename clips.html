@@ -336,6 +336,32 @@
             cursor: pointer;
             font-size: 24px;
         }
+
+        .load-more-btn {
+            padding: 16px 48px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .load-more-btn:hover {
+            background: #ff5a9e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+
+        .load-more-btn:disabled {
+            background: var(--bg-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -417,19 +443,32 @@
         let currentClips = [];
         let currentPeriod = '7d';
         let currentSort = 'views';
+        let currentOffset = 0;
+        let hasMore = true;
+        let isLoading = false;
+        const CLIPS_PER_PAGE = 100;
 
         // ============================================
         // API FUNCTIONS
         // ============================================
         
-        async function fetchClips() {
-            showLoading();
+        async function fetchClips(loadMore = false) {
+            if (isLoading) return;
+            isLoading = true;
+
+            if (!loadMore) {
+                currentOffset = 0;
+                currentClips = [];
+                hasMore = true;
+                showLoading();
+            }
 
             try {
                 const params = new URLSearchParams({
                     period: currentPeriod,
                     sort: currentSort,
-                    limit: '200'
+                    limit: CLIPS_PER_PAGE.toString(),
+                    offset: currentOffset.toString()
                 });
 
                 const response = await fetch(`/api/clips?${params}`);
@@ -444,7 +483,16 @@
                     throw new Error(data.error || 'Unknown error');
                 }
 
-                currentClips = data.data || [];
+                const newClips = data.data || [];
+                currentClips = loadMore ? [...currentClips, ...newClips] : newClips;
+                hasMore = data.pagination?.hasMore || false;
+                currentOffset += newClips.length;
+                
+                // Update total count from API
+                if (data.pagination?.total) {
+                    document.getElementById('clip-count').textContent = 
+                        `${currentClips.length} / ${data.pagination.total}`;
+                }
                 
                 if (currentClips.length === 0) {
                     showEmpty();
@@ -455,6 +503,8 @@
             } catch (error) {
                 console.error('Error fetching clips:', error);
                 showError(error.message);
+            } finally {
+                isLoading = false;
             }
         }
 
@@ -467,7 +517,20 @@
             updateStats(currentClips.length, totalViews);
 
             const grid = document.getElementById('clips-grid');
-            grid.innerHTML = currentClips.map(clip => createClipCard(clip)).join('');
+            let html = currentClips.map(clip => createClipCard(clip)).join('');
+            
+            // Add Load More button if there are more clips
+            if (hasMore) {
+                html += `
+                    <div class="load-more-wrapper" style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">
+                        <button class="load-more-btn" onclick="fetchClips(true)">
+                            Load More Clips
+                        </button>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
         }
 
         function createClipCard(clip) {
