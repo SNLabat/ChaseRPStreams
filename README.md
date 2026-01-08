@@ -307,7 +307,7 @@ The `vercel.json` configures function timeouts and cron:
 - Powered by [Twitch API](https://dev.twitch.tv/)
 - Database by [Supabase](https://supabase.com/)
 - Hosted on [Vercel](https://vercel.com/)
-- Not affiliated with Rockstar Games or Chase RP
+- Not affiliated with Rockstar Games
 
 ## License
 
