@@ -6,7 +6,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
