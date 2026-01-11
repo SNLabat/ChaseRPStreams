@@ -1,13 +1,19 @@
 // /api/clips.js
-// Serves clips from Supabase database
+// Updated to work with new twitch_clips table schema
+// Compatible with both old and new table structures
 
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY // Use anon key for read-only access
+    process.env.SUPABASE_ANON_KEY
 );
+
+// Determine which table to use based on environment variable
+// Set USE_NEW_SCHEMA=true to use twitch_clips table
+const USE_NEW_SCHEMA = process.env.USE_NEW_SCHEMA === 'true';
+const TABLE_NAME = USE_NEW_SCHEMA ? 'twitch_clips' : 'clips';
 
 module.exports = async function handler(req, res) {
     // Set CORS headers
@@ -29,16 +35,22 @@ module.exports = async function handler(req, res) {
             limit = '100',
             offset = '0',
             sort = 'views',      // 'views' or 'recent'
-            period = '7d',       // '24h', '7d', '30d', 'all'
-            streamer,            // Filter by broadcaster_id or broadcaster_name
-            search               // Search in title
+            period = '7d',       // '24h', '7d', '30d', '90d', 'all'
+            streamer,            // Filter by streamer username
+            search,              // Search in title
+            server = 'chaserp'   // Filter by server (new schema only)
         } = req.query;
 
-        // Build query
+        // Build base query
         let query = supabase
-            .from('clips')
-            .select('*')
+            .from(TABLE_NAME)
+            .select('*', { count: 'exact' })
             .eq('is_valid', true);
+
+        // Apply server filter (new schema only)
+        if (USE_NEW_SCHEMA && server) {
+            query = query.eq('serverId', server);
+        }
 
         // Apply time filter
         if (period !== 'all') {
@@ -62,24 +74,33 @@ module.exports = async function handler(req, res) {
                     startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             }
             
-            query = query.gte('created_at', startDate.toISOString());
+            const dateColumn = USE_NEW_SCHEMA ? 'twitch_created_at' : 'created_at';
+            query = query.gte(dateColumn, startDate.toISOString());
         }
 
         // Apply streamer filter
         if (streamer) {
-            query = query.or(`broadcaster_id.eq.${streamer},broadcaster_name.ilike.%${streamer}%`);
+            if (USE_NEW_SCHEMA) {
+                // New schema: use streamer_username
+                query = query.eq('streamer_username', streamer.toLowerCase());
+            } else {
+                // Old schema: use broadcaster_login or broadcaster_name
+                query = query.or(`broadcaster_id.eq.${streamer},broadcaster_name.ilike.%${streamer}%`);
+            }
         }
 
         // Apply search filter
         if (search) {
-            query = query.ilike('title', `%${search}%`);
+            const titleColumn = USE_NEW_SCHEMA ? 'clip_title' : 'title';
+            query = query.ilike(titleColumn, `%${search}%`);
         }
 
         // Apply sorting
         if (sort === 'views') {
             query = query.order('view_count', { ascending: false });
         } else {
-            query = query.order('created_at', { ascending: false });
+            const dateColumn = USE_NEW_SCHEMA ? 'twitch_created_at' : 'created_at';
+            query = query.order(dateColumn, { ascending: false });
         }
 
         // Apply pagination
@@ -99,29 +120,39 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // Get total count for pagination
-        const { count: totalCount } = await supabase
-            .from('clips')
-            .select('*', { count: 'exact', head: true })
-            .eq('is_valid', true);
+        // Transform data if using new schema (for backward compatibility)
+        const transformedClips = USE_NEW_SCHEMA ? clips.map(clip => ({
+            ...clip,
+            // Add aliases for old column names
+            title: clip.clip_title,
+            broadcaster_login: clip.streamer_username,
+            broadcaster_name: clip.streamer_username,
+            created_at: clip.twitch_created_at,
+            duration: clip.duration_seconds
+        })) : clips;
 
         // Set cache headers
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
 
         return res.status(200).json({
             success: true,
-            data: clips,
+            data: transformedClips,
             pagination: {
-                total: totalCount,
+                total: count,
                 limit: limitNum,
                 offset: offsetNum,
-                hasMore: offsetNum + clips.length < totalCount
+                hasMore: offsetNum + clips.length < count
             },
             filters: {
                 period,
                 sort,
                 streamer: streamer || null,
-                search: search || null
+                search: search || null,
+                server: USE_NEW_SCHEMA ? (server || null) : null
+            },
+            meta: {
+                table: TABLE_NAME,
+                schema_version: USE_NEW_SCHEMA ? 'v2' : 'v1'
             }
         });
 
