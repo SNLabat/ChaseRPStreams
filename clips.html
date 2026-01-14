@@ -505,6 +505,7 @@
         // ============================================
         const CONFIG = {
             SUPABASE_PROJECT_REF: 'qsnkjpsobsaohoxxxgqo', // Your actual project ref
+            SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzbmtqcHNvYnNhb2hveHh4Z3FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3MjYwNzMsImV4cCI6MjA1MjMwMjA3M30.QnHTl3W9xHcUTUm8M_fzV1oHHBqVXVZFkw_p6PXW1S0', // Your anon key (safe to expose)
             PARENT_DOMAIN: window.location.hostname
         };
 
@@ -562,7 +563,11 @@
                 }
 
                 console.log('Fetching from:', url);
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`Failed to fetch clips (${response.status})`);
