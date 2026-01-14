@@ -509,7 +509,7 @@
         };
 
         // Initialize Supabase client
-        const supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
         // State
         let currentView = 'top';
@@ -541,7 +541,7 @@
 
                 if (currentView === 'trending') {
                     // Query hasroot_clips table directly
-                    const { data: clips, error, count } = await supabase
+                    const { data: clips, error, count } = await supabaseClient
                         .from('hasroot_clips')
                         .select('*', { count: 'exact' })
                         .eq('is_trending', true)
@@ -561,7 +561,7 @@
                     };
                 } else {
                     // Query twitch_clips table directly
-                    let query = supabase
+                    let query = supabaseClient
                         .from('twitch_clips')
                         .select('*', { count: 'exact' })
                         .eq('is_valid', true)
