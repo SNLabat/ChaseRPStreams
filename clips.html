@@ -678,10 +678,17 @@
             const isTrending = currentView === 'trending';
             const viewCount = clip.view_count || clip.views || 0;
             const title = clip.title || clip.clip_title || '';
-            const broadcasterName = clip.broadcaster_name || clip.broadcaster_display_name || 'Unknown';
+            const broadcasterName = clip.broadcaster_name || clip.broadcaster_display_name || clip.streamer_username || 'Unknown';
             const createdAt = clip.created_at || clip.twitch_created_at || new Date().toISOString();
             const duration = clip.duration || clip.duration_seconds || 0;
-            const thumbnailUrl = clip.thumbnail_url || '';
+            
+            // Handle thumbnail URL - HasRoot clips might have different format
+            let thumbnailUrl = clip.thumbnail_url || '';
+            if (isTrending && !thumbnailUrl && clip.slug) {
+                // Try to construct Twitch thumbnail URL from slug
+                thumbnailUrl = `https://clips-media-assets2.twitch.tv/${clip.slug}/preview-480x272.jpg`;
+            }
+            
             const clipId = clip.clip_id || clip.slug || '';
             const profileUrl = clip.profile_image_url || 
                 'https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png';
@@ -696,7 +703,7 @@
                 <div class="clip-card" onclick="openModal('${clipId}', ${isTrending})">
                     <div class="clip-thumbnail-wrapper">
                         ${trendingBadge}
-                        <img class="clip-thumbnail" src="${thumbnailUrl}" alt="${escapeHtml(title)}" loading="lazy">
+                        <img class="clip-thumbnail" src="${thumbnailUrl}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://static-cdn.jtvnw.net/ttv-static/404_preview-320x180.jpg'">
                         <div class="clip-duration">${formatDuration(duration)}</div>
                         <div class="clip-views">
                             👁 ${formatNumber(viewCount)}${trendingScore}
@@ -705,7 +712,7 @@
                     <div class="clip-content">
                         <h3 class="clip-title">${escapeHtml(title)}</h3>
                         <div class="clip-meta">
-                            <img class="clip-avatar" src="${profileUrl}" alt="${broadcasterName}">
+                            <img class="clip-avatar" src="${profileUrl}" alt="${broadcasterName}" onerror="this.src='https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png'">
                             <span>${broadcasterName}</span>
                             <span>• ${formatDate(createdAt)}</span>
                         </div>
@@ -802,18 +809,28 @@
                 `${broadcasterName} • ${formatNumber(viewCount)} views`;
 
             let embedHtml;
-            if (isTrending && clip.url) {
+            
+            // For HasRoot clips, try to embed using slug
+            if (isTrending && (clip.slug || clip.url)) {
+                const slug = clip.slug || clip.url.split('/').pop();
+                // Try to embed the clip directly
+                const embedUrl = `https://clips.twitch.tv/embed?clip=${slug}&parent=${CONFIG.PARENT_DOMAIN}&autoplay=true`;
+                embedHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+            } else if (clip.clip_id) {
+                // Regular Twitch clip embed
+                const embedUrl = `https://clips.twitch.tv/embed?clip=${clip.clip_id}&parent=${CONFIG.PARENT_DOMAIN}&autoplay=true`;
+                embedHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+            } else {
+                // Fallback - show link
+                const clipUrl = clip.url || `https://clips.twitch.tv/${clipId}`;
                 embedHtml = `
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center;">
-                        <p style="margin-bottom: 24px; font-size: 1.125rem; color: var(--text-secondary);">This is a trending clip from the community</p>
-                        <a href="${clip.url}" target="_blank" class="view-url-btn">
+                        <p style="margin-bottom: 24px; font-size: 1.125rem; color: var(--text-secondary);">Unable to embed this clip</p>
+                        <a href="${clipUrl}" target="_blank" class="view-url-btn">
                             Watch on Twitch →
                         </a>
                     </div>
                 `;
-            } else {
-                const embedUrl = `https://clips.twitch.tv/embed?clip=${clipId}&parent=${CONFIG.PARENT_DOMAIN}&autoplay=true`;
-                embedHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
             }
 
             document.getElementById('modal-video').innerHTML = embedHtml;
