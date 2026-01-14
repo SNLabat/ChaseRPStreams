@@ -776,6 +776,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Made with ❤️ for the Chase Roleplay Community
 
-**[Website](https://chaserp.com)** • **[Discord](https://discord.gg/chaserp)** • **[Twitch](https://twitch.tv/directory/game/Grand%20Theft%20Auto%20V)**
+**[Website](https://chaseroleplay.com)** • **[Discord](https://discord.gg/chaserp)** • **[Twitch](https://twitch.tv/directory/game/Grand%20Theft%20Auto%20V)**
 
 </div>
