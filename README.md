@@ -2,7 +2,7 @@
 
 A comprehensive Twitch clips aggregation platform for the Chase Roleplay GTA V community. Automatically collects, validates, and displays clips from community streamers with real-time trending analytics powered by HasRoot API.
 
-[![Live Site](https://img.shields.io/badge/Live-Site-ff3c8e?style=for-the-badge)](https://chaserp.com)
+[![Live Site](https://img.shields.io/badge/Live-Site-ff3c8e?style=for-the-badge)](https://chaseroleplay.com)
 [![Powered by Supabase](https://img.shields.io/badge/Powered%20by-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
 [![Built with Deno](https://img.shields.io/badge/Built%20with-Deno-000000?style=for-the-badge&logo=deno)](https://deno.land)
 
