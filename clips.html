@@ -7,12 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Load Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
-        /* Keep all your existing CSS exactly as is */
         :root {
             --bg-primary: #0a0a0c;
             --bg-secondary: #121216;
@@ -73,7 +68,6 @@
             padding: 16px 0 24px;
             border-bottom: 1px solid var(--border);
             margin-bottom: 24px;
-            position: relative;
         }
 
         .nav-tab {
@@ -91,7 +85,6 @@
             cursor: pointer;
             text-decoration: none;
             transition: all 0.2s ease;
-            position: relative;
         }
 
         .nav-tab:hover {
@@ -105,17 +98,7 @@
             border-color: var(--accent);
         }
 
-        .nav-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 2px;
-            background: var(--accent);
-        }
-
+        /* Filters */
         .filters {
             display: flex;
             flex-wrap: wrap;
@@ -162,6 +145,7 @@
             background-position: right 12px center;
         }
 
+        /* Stats */
         .stats-bar {
             display: flex;
             align-items: center;
@@ -181,6 +165,7 @@
             text-transform: uppercase;
         }
 
+        /* Clips grid */
         .clips-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -240,36 +225,6 @@
             font-size: 0.75rem;
         }
 
-        .trending-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: linear-gradient(135deg, #ff3c8e, #ff6b9d);
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            box-shadow: 0 4px 12px rgba(255, 60, 142, 0.5);
-            z-index: 2;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .trending-score {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-left: 4px;
-        }
-
         .clip-content {
             padding: 16px;
         }
@@ -298,6 +253,7 @@
             border-radius: 50%;
         }
 
+        /* States */
         .loading-state, .error-state, .empty-state {
             grid-column: 1 / -1;
             text-align: center;
@@ -327,6 +283,7 @@
             color: var(--text-secondary);
         }
 
+        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -405,23 +362,6 @@
             transform: none;
             box-shadow: none;
         }
-
-        .view-url-btn {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 12px 24px;
-            background: var(--purple);
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .view-url-btn:hover {
-            background: #a970ff;
-            transform: translateY(-2px);
-        }
     </style>
 </head>
 <body>
@@ -439,22 +379,15 @@
                 </svg>
                 Live Streams
             </a>
-            <a href="#" class="nav-tab active" id="top-clips-tab">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="12 2 15 10 23 10 17 16 19 23 12 18 5 23 7 16 1 10 9 10"/>
+            <a href="clips-v2.html" class="nav-tab active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 8h16M4 16h16"/>
                 </svg>
                 Top Clips
             </a>
-            <a href="#" class="nav-tab" id="trending-tab">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                    <polyline points="17 6 23 6 23 12"/>
-                </svg>
-                Trending
-            </a>
         </nav>
 
-        <div class="filters" id="filters">
+        <div class="filters">
             <button class="filter-btn" data-period="24h">Past 24 Hours</button>
             <button class="filter-btn active" data-period="7d">Past Week</button>
             <button class="filter-btn" data-period="30d">Past Month</button>
@@ -500,19 +433,13 @@
 
     <script>
         // ============================================
-        // CONFIGURATION - USING SUPABASE CLIENT
+        // CONFIGURATION
         // ============================================
         const CONFIG = {
-            SUPABASE_URL: 'https://qsnkjpsobsaohoxxxgqo.supabase.co',
-            SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzbmtqcHNvYnNhb2hveHh4Z3FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4OTM4NjgsImV4cCI6MjA4MzQ2OTg2OH0.ax_geRnKPVptzXNEAQq8YP7tHeHBSdUA_Ud5tLZLOUg',
             PARENT_DOMAIN: window.location.hostname
         };
 
-        // Initialize Supabase client
-        const supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-
         // State
-        let currentView = 'top';
         let currentClips = [];
         let currentPeriod = '7d';
         let currentSort = 'views';
@@ -522,7 +449,7 @@
         const CLIPS_PER_PAGE = 100;
 
         // ============================================
-        // API FUNCTIONS - USING SUPABASE CLIENT
+        // API FUNCTIONS
         // ============================================
         
         async function fetchClips(loadMore = false) {
@@ -537,94 +464,23 @@
             }
 
             try {
-                let data;
+                const params = new URLSearchParams({
+                    period: currentPeriod,
+                    sort: currentSort,
+                    limit: CLIPS_PER_PAGE.toString(),
+                    offset: currentOffset.toString()
+                });
 
-                if (currentView === 'trending') {
-                    // Query hasroot_clips table directly
-                    const { data: clips, error, count } = await supabaseClient
-                        .from('hasroot_clips')
-                        .select('*', { count: 'exact' })
-                        .eq('is_trending', true)
-                        .order('trending_score', { ascending: false })
-                        .order('views', { ascending: false })
-                        .range(currentOffset, currentOffset + CLIPS_PER_PAGE - 1);
+                const response = await fetch(`/api/clips?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch clips');
+                }
 
-                    if (error) throw error;
+                const data = await response.json();
 
-                    data = {
-                        success: true,
-                        data: clips,
-                        pagination: {
-                            total: count,
-                            hasMore: currentOffset + clips.length < count
-                        }
-                    };
-                } else {
-                    // Query twitch_clips table directly
-                    let query = supabaseClient
-                        .from('twitch_clips')
-                        .select('*', { count: 'exact' })
-                        .eq('is_valid', true)
-                        .eq('serverid', 'chaserp');  // Fixed: lowercase serverid
-
-                    // Apply time filter
-                    if (currentPeriod !== 'all') {
-                        const now = new Date();
-                        let startDate;
-                        
-                        switch (currentPeriod) {
-                            case '24h':
-                                startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-                                break;
-                            case '7d':
-                                startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                                break;
-                            case '30d':
-                                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                                break;
-                            case '90d':
-                                startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-                                break;
-                            default:
-                                startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        }
-                        
-                        query = query.gte('twitch_created_at', startDate.toISOString());
-                    }
-
-                    // Apply sorting
-                    if (currentSort === 'views') {
-                        query = query.order('view_count', { ascending: false });
-                    } else {
-                        query = query.order('twitch_created_at', { ascending: false });
-                    }
-
-                    // Apply pagination
-                    query = query.range(currentOffset, currentOffset + CLIPS_PER_PAGE - 1);
-
-                    const { data: clips, error, count } = await query;
-
-                    if (error) throw error;
-
-                    // Transform for compatibility
-                    const transformedClips = clips.map(clip => ({
-                        ...clip,
-                        title: clip.clip_title,
-                        broadcaster_login: clip.streamer_username,
-                        broadcaster_name: clip.streamer_username,
-                        created_at: clip.twitch_created_at,
-                        duration: clip.duration_seconds,
-                        serverId: clip.serverid, // Map lowercase to camelCase for compatibility
-                    }));
-
-                    data = {
-                        success: true,
-                        data: transformedClips,
-                        pagination: {
-                            total: count,
-                            hasMore: currentOffset + clips.length < count
-                        }
-                    };
+                if (!data.success) {
+                    throw new Error(data.error || 'Unknown error');
                 }
 
                 const newClips = data.data || [];
@@ -632,6 +488,7 @@
                 hasMore = data.pagination?.hasMore || false;
                 currentOffset += newClips.length;
                 
+                // Update total count from API
                 if (data.pagination?.total) {
                     document.getElementById('clip-count').textContent = 
                         `${currentClips.length} / ${data.pagination.total}`;
@@ -651,16 +508,18 @@
             }
         }
 
-        // Keep all your existing display functions exactly as they are...
-        // (displayClips, createClipCard, formatNumber, formatDuration, etc.)
-        
+        // ============================================
+        // DISPLAY FUNCTIONS
+        // ============================================
+
         function displayClips() {
-            const totalViews = currentClips.reduce((sum, c) => sum + (c.view_count || c.views || 0), 0);
+            const totalViews = currentClips.reduce((sum, c) => sum + (c.view_count || 0), 0);
             updateStats(currentClips.length, totalViews);
 
             const grid = document.getElementById('clips-grid');
             let html = currentClips.map(clip => createClipCard(clip)).join('');
             
+            // Add Load More button if there are more clips
             if (hasMore) {
                 html += `
                     <div class="load-more-wrapper" style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">
@@ -675,51 +534,34 @@
         }
 
         function createClipCard(clip) {
-            const isTrending = currentView === 'trending';
-            const viewCount = clip.view_count || clip.views || 0;
-            const title = clip.title || clip.clip_title || '';
-            const broadcasterName = clip.broadcaster_name || clip.broadcaster_display_name || clip.streamer_username || 'Unknown';
-            const createdAt = clip.created_at || clip.twitch_created_at || new Date().toISOString();
-            const duration = clip.duration || clip.duration_seconds || 0;
-            
-            // Handle thumbnail URL - HasRoot clips might have different format
-            let thumbnailUrl = clip.thumbnail_url || '';
-            if (isTrending && !thumbnailUrl && clip.slug) {
-                // Try to construct Twitch thumbnail URL from slug
-                thumbnailUrl = `https://clips-media-assets2.twitch.tv/${clip.slug}/preview-480x272.jpg`;
-            }
-            
-            const clipId = clip.clip_id || clip.slug || '';
+            const thumbnailUrl = clip.thumbnail_url || '';
             const profileUrl = clip.profile_image_url || 
                 'https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png';
 
-            const trendingBadge = isTrending && clip.trending_score ? 
-                `<div class="trending-badge">🔥 HOT</div>` : '';
-
-            const trendingScore = isTrending && clip.trending_score ? 
-                `<span class="trending-score">• ${Math.round(clip.trending_score)}</span>` : '';
-
             return `
-                <div class="clip-card" onclick="openModal('${clipId}', ${isTrending})">
+                <div class="clip-card" onclick="openModal('${clip.clip_id}')">
                     <div class="clip-thumbnail-wrapper">
-                        ${trendingBadge}
-                        <img class="clip-thumbnail" src="${thumbnailUrl}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://static-cdn.jtvnw.net/ttv-static/404_preview-320x180.jpg'">
-                        <div class="clip-duration">${formatDuration(duration)}</div>
+                        <img class="clip-thumbnail" src="${thumbnailUrl}" alt="${escapeHtml(clip.title)}" loading="lazy">
+                        <div class="clip-duration">${formatDuration(clip.duration)}</div>
                         <div class="clip-views">
-                            👁 ${formatNumber(viewCount)}${trendingScore}
+                            👁 ${formatNumber(clip.view_count)}
                         </div>
                     </div>
                     <div class="clip-content">
-                        <h3 class="clip-title">${escapeHtml(title)}</h3>
+                        <h3 class="clip-title">${escapeHtml(clip.title)}</h3>
                         <div class="clip-meta">
-                            <img class="clip-avatar" src="${profileUrl}" alt="${broadcasterName}" onerror="this.src='https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png'">
-                            <span>${broadcasterName}</span>
-                            <span>• ${formatDate(createdAt)}</span>
+                            <img class="clip-avatar" src="${profileUrl}" alt="${clip.broadcaster_name}">
+                            <span>${clip.broadcaster_name}</span>
+                            <span>• ${formatDate(clip.created_at)}</span>
                         </div>
                     </div>
                 </div>
             `;
         }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
 
         function formatNumber(num) {
             if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -757,16 +599,16 @@
             document.getElementById('total-views').textContent = formatNumber(viewCount);
         }
 
+        // ============================================
+        // UI STATE FUNCTIONS
+        // ============================================
+
         function showLoading() {
-            const message = currentView === 'trending' ? 
-                'Loading trending clips from HasRoot...' : 
-                'Fetching clips from database...';
-            
             document.getElementById('clips-grid').innerHTML = `
                 <div class="loading-state">
                     <div class="loading-spinner"></div>
-                    <h3 class="state-title">Loading ${currentView === 'trending' ? 'Trending ' : ''}Clips</h3>
-                    <p class="state-message">${message}</p>
+                    <h3 class="state-title">Loading Clips</h3>
+                    <p class="state-message">Fetching clips from database...</p>
                 </div>
             `;
         }
@@ -781,59 +623,32 @@
         }
 
         function showEmpty() {
-            const msg = currentView === 'trending' ? 
-                'No trending clips available right now. Check back soon!' :
-                'No clips found for this time period. Try a different filter.';
-            
             document.getElementById('clips-grid').innerHTML = `
                 <div class="empty-state">
                     <h3 class="state-title">No Clips Found</h3>
-                    <p class="state-message">${msg}</p>
+                    <p class="state-message">No clips found for this time period. Try a different filter.</p>
                 </div>
             `;
             updateStats(0, 0);
         }
 
-        function openModal(clipId, isTrending = false) {
-            const clip = currentClips.find(c => 
-                (c.clip_id === clipId || c.slug === clipId)
-            );
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+
+        function openModal(clipId) {
+            const clip = currentClips.find(c => c.clip_id === clipId);
             if (!clip) return;
 
-            const title = clip.title || clip.clip_title || '';
-            const broadcasterName = clip.broadcaster_name || clip.broadcaster_display_name || 'Unknown';
-            const viewCount = clip.view_count || clip.views || 0;
-
-            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-title').textContent = clip.title;
             document.getElementById('modal-meta').textContent = 
-                `${broadcasterName} • ${formatNumber(viewCount)} views`;
+                `${clip.broadcaster_name} • ${formatNumber(clip.view_count)} views`;
 
-            let embedHtml;
-            
-            // For HasRoot clips, try to embed using slug
-            if (isTrending && (clip.slug || clip.url)) {
-                const slug = clip.slug || clip.url.split('/').pop();
-                // Try to embed the clip directly
-                const embedUrl = `https://clips.twitch.tv/embed?clip=${slug}&parent=${CONFIG.PARENT_DOMAIN}&autoplay=true`;
-                embedHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-            } else if (clip.clip_id) {
-                // Regular Twitch clip embed
-                const embedUrl = `https://clips.twitch.tv/embed?clip=${clip.clip_id}&parent=${CONFIG.PARENT_DOMAIN}&autoplay=true`;
-                embedHtml = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-            } else {
-                // Fallback - show link
-                const clipUrl = clip.url || `https://clips.twitch.tv/${clipId}`;
-                embedHtml = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center;">
-                        <p style="margin-bottom: 24px; font-size: 1.125rem; color: var(--text-secondary);">Unable to embed this clip</p>
-                        <a href="${clipUrl}" target="_blank" class="view-url-btn">
-                            Watch on Twitch →
-                        </a>
-                    </div>
-                `;
-            }
+            const embedUrl = `https://clips.twitch.tv/embed?clip=${clip.clip_id}&parent=${CONFIG.PARENT_DOMAIN}&autoplay=true`;
+            document.getElementById('modal-video').innerHTML = `
+                <iframe src="${embedUrl}" allowfullscreen></iframe>
+            `;
 
-            document.getElementById('modal-video').innerHTML = embedHtml;
             document.getElementById('modal-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -844,35 +659,13 @@
             document.body.style.overflow = '';
         }
 
-        // Event listeners
-        document.getElementById('top-clips-tab').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentView === 'top') return;
-            
-            currentView = 'top';
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('top-clips-tab').classList.add('active');
-            document.getElementById('filters').style.display = 'flex';
-            
-            fetchClips();
-        });
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
 
-        document.getElementById('trending-tab').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentView === 'trending') return;
-            
-            currentView = 'trending';
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('trending-tab').classList.add('active');
-            document.getElementById('filters').style.display = 'none';
-            
-            fetchClips();
-        });
-
+        // Period filter buttons
         document.querySelectorAll('.filter-btn[data-period]').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (currentView === 'trending') return;
-                
                 document.querySelectorAll('.filter-btn[data-period]').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentPeriod = btn.dataset.period;
@@ -880,27 +673,28 @@
             });
         });
 
+        // Sort select
         document.getElementById('sort-select').addEventListener('change', (e) => {
-            if (currentView === 'trending') return;
-            
             currentSort = e.target.value;
             fetchClips();
         });
 
+        // Close modal on overlay click
         document.getElementById('modal-overlay').addEventListener('click', (e) => {
             if (e.target.id === 'modal-overlay') {
                 closeModal();
             }
         });
 
+        // Close modal on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeModal();
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('top-clips-tab').classList.add('active');
-            fetchClips();
-        });
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        document.addEventListener('DOMContentLoaded', fetchClips);
     </script>
 </body>
 </html>
